@@ -7,15 +7,18 @@ MIRROR=http://mirror.infomaniak.com/debian
 TOOL=debootstrap
 
 make_container() {
-	if [ "$TOOL" != "debootstrap" ]; then
+	# TODO: Convert to a switch/case or similar
+	if [ "$TOOL" != "debootstrap" ] && [ "$TOOL" != "mmdebstrap" ]; then
 		print_message "$TOOL is currently not supported, exiting.";
 		exit 1;
 	fi
 
 	mkdir -p $CACHE_DIR;
-	# TODO: Add mmdebstrap for other distro support (https://wiki.debian.org/sbuild) mmdebstrap --variant=buildd unstable ~/.cache/sbuild/unstable-amd64.tar.zst;
-
-	sbuild-createchroot --include=eatmydata,ccache $DEB_VARIANT $CACHE_DIR/$DEB_VARIANT $MIRROR
+	if [ "$TOOL" = "debootstrap"]; then
+		sbuild-createchroot --include=eatmydata,ccache $DEB_VARIANT $CACHE_DIR/$DEB_VARIANT $MIRROR;
+	elif [ "$TOOL" = "mmdebstrap"]; then
+		mmdebstrap --variant=buildd $DEB_VARIANT $CACHE_DIR/$DEB_VARIANT.tar.zst;
+	fi
 }
 
 print_message() {
